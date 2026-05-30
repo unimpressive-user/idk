@@ -3,12 +3,19 @@ set -euo pipefail
 
 VRC_LOG_DIR="/mnt/WD_BLACK_2TB/SteamLibrary/steamapps/compatdata/438100/pfx/drive_c/users/steamuser/AppData/LocalLow/VRChat/VRChat/"
 LIST_LINK="https://raw.githubusercontent.com/Furry-Hideout1/moderator-whitelist/refs/heads/main/moderators.txt"
-
+HIDE="Entering Room: \| Joining or Creating Room:"
 TMP_LIST=$(mktemp)
-SEEN=$(mktemp)
+
+boo() {
+    notify-send "$MATCH" \
+        --icon=dialog-warning \
+        --expire-time=5000
+    pw-play untitled.opus
+}
 
 rmtemp() {
-    rm -f "$TMP_LIST" "$SEEN"
+    rm -f "$TMP_LIST"
+    echo "TMP wiped"
 }
 
 trap rmtemp EXIT INT TERM
@@ -21,30 +28,21 @@ if [[ -z "$VRC_LOG_FILE" ]]; then
 fi
 
 if ! curl -fsSL "$LIST_LINK" -o "$TMP_LIST"; then
-    echo "Failed to download moderator list"
+    echo "Failed to download list"
     exit 1
 fi
 
 if [[ ! -s "$TMP_LIST" ]]; then
-    echo "Moderator list is empty"
+    echo "List is empty"
     exit 1
 fi
 
-while true; do
-
-    if [[ -s "$SEEN" ]]; then
-        MATCH=$(grep -Ff "$TMP_LIST" "$VRC_LOG_FILE" | grep -Fvf "$SEEN" || true)
-    else
-        MATCH=$(grep -Ff "$TMP_LIST" "$VRC_LOG_FILE" || true)
-    fi
-
-    if [[ -n "$MATCH" ]]; then
-        echo "$MATCH" >> "$SEEN"
+echo "Log file in use: $VRC_LOG_FILE"
+echo "$HIDE"
+tail -fn "$VRC_LOG_FILE" \
+    | grep --line-buffered -Ff "$TMP_LIST" \
+    | grep --line-buffered -v "$HIDE" \
+    | while read -r MATCH ; do
         echo "$MATCH"
-    else
-        echo "No match found"
-    fi
-
-    sleep 1
-done
-
+        boo "$MATCH"
+        done
