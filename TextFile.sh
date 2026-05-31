@@ -7,7 +7,7 @@ HIDE="Entering Room: \| Joining or Creating Room:"
 TMP_LIST=$(mktemp)
 
 boo() {
-    notify-send "$MATCH" \
+    notify-send \
         --icon=dialog-warning \
         --expire-time=5000
     pw-play untitled.opus
