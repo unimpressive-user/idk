@@ -39,7 +39,7 @@ fi
 
 echo "Log file in use: $VRC_LOG_FILE"
 echo "$HIDE"
-tail -fn "$VRC_LOG_FILE" \
+tail -fn0 "$VRC_LOG_FILE" \
     | grep --line-buffered -Ff "$TMP_LIST" \
     | grep --line-buffered -v "$HIDE" \
     | while read -r MATCH ; do
