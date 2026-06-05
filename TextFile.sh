@@ -8,6 +8,7 @@ TMP_LIST=$(mktemp)
 
 boo() {
     notify-send \
+        --transient "$MATCH" \
         --icon=dialog-warning \
         --expire-time=5000
     pw-play untitled.opus
@@ -44,5 +45,5 @@ tail -fn0 "$VRC_LOG_FILE" \
     | grep --line-buffered -v "$HIDE" \
     | while read -r MATCH ; do
         echo "$MATCH"
-        boo "$MATCH"
+        boo
         done
